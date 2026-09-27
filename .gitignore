@@ -1,0 +1,14 @@
+# Python & R environments
+.venv/
+__pycache__/
+.Rproj.user/
+.Rhistory
+.RData
+.Ruserdata
+# macOS
+.DS_Store
+
+# Large data files
+*.csv
+*.xlsx
+*.parquet
