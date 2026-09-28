@@ -55,7 +55,11 @@ The R code chunk below includes the R packages required to knit this document. T
 library(tidyverse)
 library(knitr)
 library(kableExtra)
+library(ggplot2)
 ```
+
+***
+## In Class Assignment - September 28th
 
 For this exercise, we will use the following two data sets.
 
@@ -91,7 +95,7 @@ regions <- read.table("../data/raw/regions.txt", header = TRUE)
 nrow(regions)
 ncol(regions)
 ```
-*There are 249 countries in this regions data set*
+*There are 249 countries in this `regions` data set*
 
 **Third**, subset the `regions` data set to only include countries from the `countries` data set.
 
@@ -150,7 +154,7 @@ ggplot(regions_subset,
   geom_bar() +
   coord_flip() +
   labs(
-    x = "Sub-region",
+    x = "Sub-Region",
     y = "Number of Countries",
     fill = "Region"
   )
