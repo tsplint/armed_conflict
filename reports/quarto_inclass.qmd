@@ -81,7 +81,7 @@ countries <- read.table("../data/raw/countries.txt", header = TRUE)
 nrow(countries)
 ncol(countries)
 ```
-*There are 186 countries in the dataset*
+*There are 186 countries in this countries dataset*
 
 **Second**, read in `regions.txt` and also write a sentence that states how many countries are included in the data set.
 
