@@ -9,43 +9,7 @@ format:
       - heightrounded
 ---
 
-For this in-class assignment, you will work in a group to create your **individual** Quarto document. Please consult your classmates and [Tutorial: Authoring](https://quarto.org/docs/get-started/authoring/rstudio.html) webpage by [Quarto](https://quarto.org/). You can also use the Internet including ChatGPT. The TA and I are also available for any questions.
 
-When you are finished, render the document to PDF. Please carefully **proof read** and make edits as needed. **Commit** and **push** the edits to this file and the new PDF file to your **new repository**. 
-
-## Create a **new** repository
-
-- Under your GitHub account, create a **new** respository called `armed_conflict`
-  - Throughout the course, we will use this repository to **reproduce** and **replicate** the analysis in the paper
-- Create **two** folders
-  - `data`
-  - `reports` 
-- Save `countries.txt` and `regions.txt` into `data/raw/` subfolder
-- Save `quarto_inclass.qmd` into `reports/` folder
-- Eventually, your repository will have a very organized structure like this:
-
-
-### Example of data science organization
-```text
-armed_conflict/
-├── README.md
-├── data/
-│   ├── raw/
-│   └── processed/
-├── scripts/
-│   ├── 01_import.R
-│   ├── 02_clean.R
-│   └── 03_analysis.R
-├── outputs/
-│   ├── figures/
-│   └── tables/
-└── reports/
-    └── analysis.qmd
-```
-
-## Edit this file to create a PDF document using Quarto
-
-The R code chunk below includes the R packages required to knit this document. This is often called a **setup** code. We want the code to run, but we don't want the final document to show the code or results. Edit the code chunk so that the code will run but the code and results (including all warnings and messages) are hidden from the final PDF output.
 
 ```{r}
 #| echo: false
@@ -58,7 +22,7 @@ library(kableExtra)
 library(ggplot2)
 ```
 
-***
+
 ## In Class Assignment - September 28th
 
 For this exercise, we will use the following two data sets.
