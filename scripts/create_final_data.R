@@ -209,3 +209,7 @@ write.csv(
 )
 # check file exists where I want it to
 file.exists(here("data", "processed", "final_data.csv"))
+
+
+## Checking codex's version
+# codex's final data set included rows with diaster data and no mortality or covariate data. my script removed them from the final dataset
