@@ -68,7 +68,7 @@ disaster0 <- read.csv(
 )
 # inspect the data
 dim(disaster0)
-names(disaster)
+names(disaster0)
 head(disaster0)
 # clean names and subset years to 2000-2019 with 2 disasters Earthquake and Draught
 disaster <- disaster0 |>
