@@ -40,10 +40,10 @@ wbfun <- function(dataname, varname) {
     pivot_longer(
       cols = starts_with("X"),
       names_to = "year",
-      names_prefix = "X",
+      names_prefix = "X", #removes X from year coloumn
       values_to = varname
     ) |>
-    mutate(year = as.numeric(year)) |>
+    mutate(year = as.numeric(year)) |> #change year to numeric
     arrange(iso, year)
 }
 
@@ -207,5 +207,5 @@ write.csv(
   here("data", "processed", "final_data.csv"),
   row.names = FALSE
 )
-# check file exists
+# check file exists where I want it to
 file.exists(here("data", "processed", "final_data.csv"))
