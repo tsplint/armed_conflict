@@ -21,7 +21,7 @@ infmor0 <- read.csv(here( "data", "raw", "infant_mortality.csv"), header = TRUE)
 neomor0 <- read.csv(here("data", "raw", "neonatal_mortality.csv"), header = TRUE)
 un5mor0 <- read.csv(here( "data", "raw", "under5_mortality.csv"), header = TRUE)
 
-# check names and if need to convert
+# check names and if need to convert country code to iso
 names(matmor0)
 head(matmor0$iso)
 names(infmor0)
@@ -33,7 +33,7 @@ dim(infmor0)
 dim(neomor0)
 dim(un5mor0)
 
-## function to prepare data
+## function to prepare data - upadate given function
 wbfun <- function(dataname, varname) {
   dataname |>
     dplyr::select(iso, X2000:X2019) |>
@@ -60,12 +60,13 @@ wblist <- list(matmor, infmor, neomor, un5mor)
 wblist |> reduce(full_join, by = c('iso', 'year')) -> wbdata
 
 # --------------------------------------
-# Prepare Disaster data
+# Prepare Disaster data #
 #---------------------------------------
 disaster0 <- read.csv(
   here("data", "raw", "disaster.csv"),
   header = TRUE
 )
+# inspect the data
 dim(disaster0)
 names(disaster)
 head(disaster0)
@@ -119,6 +120,7 @@ dim(conflict0)
 names(conflict0)
 head(conflict0)
 
+# combine years so no mulitple years
 conflict <- conflict0 |>
   group_by(iso, year, conflict_id) |>
   summarise(
@@ -128,7 +130,7 @@ conflict <- conflict0 |>
 head(conflict)
 dim(conflict)
 
-# create binary armed conflict variable based off of >25 death cutoff from paper
+# create binary armed conflict variable based off of > or equal to 25 death cutoff from paper
 conflict <- conflict |>
   mutate(
     armed_conflict = ifelse(deaths >= 25, 1, 0)
@@ -193,8 +195,12 @@ final_data <- final_data |>
 table(final_data$earthquake, useNA = "ifany")
 table(final_data$drought, useNA = "ifany")
 
+head(final_data)
 
-# create CSV of final data 
+# --------------------------------------
+# Create CSV of final data file
+#---------------------------------------
+
 
 write.csv(
   final_data,
