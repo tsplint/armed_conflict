@@ -8,6 +8,5 @@ __pycache__/
 # macOS
 .DS_Store
 # Large data files
-*.csv
 *.xlsx
 *.parquet
