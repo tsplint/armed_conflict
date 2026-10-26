@@ -122,9 +122,9 @@ head(conflict0)
 
 # combine years so no mulitple years
 conflict <- conflict0 |>
-  group_by(iso, year, conflict_id) |>
+  group_by(iso, year) |>
   summarise(
-    deaths = sum(best, na.rm = TRUE),
+    deaths = sum(best),
     .groups = "drop"
   )
 head(conflict)
@@ -189,7 +189,8 @@ table(final_data$drought, useNA = "ifany")
 final_data <- final_data |>
   mutate(
     earthquake = replace_na(earthquake, 0),
-    drought = replace_na(drought, 0)
+    drought = replace_na(drought, 0),
+    armed_conflict_lag1 = replace_na(armed_conflict_lag1, 0)
   )
 # check NAs are changed to 0
 table(final_data$earthquake, useNA = "ifany")
