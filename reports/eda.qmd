@@ -1,0 +1,346 @@
+---
+title: "Exploratory Data Analysis (EDA) of Armed Conflict dataset"
+author: "Tallinn Splinter"
+format: 
+  pdf:
+    geometry:
+      - top=30mm
+      - left=20mm
+      - heightrounded
+---
+
+# Introduction
+
+This report explores Exploratory Data Anaylsysis (EDA) for the generated armed_conflict dataset. It explores the distributions, missing data, temporal patterns, and relationships between armed conflict, natural disasters, and mortality rates from 2000 to 2019.
+
+## Load Packages and Data
+
+```{r}
+library(tidyverse)
+library(dplyr)
+library(tidyr)
+library(knitr)
+
+final_data <- read_csv("data/processed/final_data.csv")
+```
+
+## Basic dataset overview Table
+
+```{r}
+tibble(
+  measure = c(
+    "Rows", "Columns", "Countries",
+    "First year", "Last year",
+    "Duplicate country-year rows",
+    "Rows with missing country or year",
+    "Rows with any missing value",
+    "Total missing cells",
+    "Percentage of cells missing"
+  ),
+  value = c(
+    nrow(final_data),
+    ncol(final_data),
+    n_distinct(final_data$iso, na.rm = TRUE),
+    min(final_data$year, na.rm = TRUE),
+    max(final_data$year, na.rm = TRUE),
+    sum(duplicated(final_data[c("iso", "year")])),
+    sum(!complete.cases(final_data[c("iso", "year")])),
+    sum(!complete.cases(final_data)),
+    sum(is.na(final_data)),
+    round(100 * mean(is.na(final_data)), 2)
+  )
+) |>
+  kable(caption = "Dataset overview")
+
+```
+
+# 1. Broadly Understanding the Data
+
+```{r}
+dim(final_data)
+names(final_data)
+glimpse(final_data)
+summary(final_data)
+```
+
+This dataset contains 3720 observations and 17 variables spanning from 2000-2019.
+
+## Inspect Observations
+
+```{r}
+head(final_data)
+tail(final_data)
+
+set.seed(123)
+slice_sample(final_data, n = 10)
+```
+
+The first and last observations show that the dataset is organized by country and year, with repeated annual observations for each country (2000-2019). It also shows that maternal mortality in Afghanistan decreased from 1,450 in 2000 to 1,140 in 2005.
+
+Initial inspection also reveals missing observations, including GDP data for Afghanistan in 2000–2001 and maternal mortality data for Zimbabwe in 2018–2019. This suggests looking into the missing data further before running any analyses.
+
+# 2. Explore Missing Data
+
+```{r}
+missing_data <- final_data |>
+  summarise(across(everything(), ~sum(is.na(.)))) |>
+  pivot_longer(
+    everything(),
+    names_to = "variable",
+    values_to = "n_missing"
+  ) |>
+  mutate(
+    percent_missing = round(
+      100 * n_missing / nrow(final_data), 2
+    )
+  )
+
+missing_data
+```
+
+Missingness varied considerably across variables. Maternal mortality had the highest proportion of missing observations (11.45%), followed by GDP (1.67%). Infant, neonatal, and under-five mortality each had 20 missing observations (0.54%), as did several other covariates.
+
+## Investigate Missing Materal Mortality data
+
+```{r}
+final_data |>
+  group_by(year) |>
+  summarise(
+    missing_n = sum(is.na(matmor)),
+    missing_percent = round(100 * mean(is.na(matmor)), 2),
+    .groups = "drop"
+  )
+```
+
+Missing maternal mortality data were strongly concentrated in the final two years of the study period. Between 2000 and 2017, only three countries had missing maternal mortality data each year. Whereas, maternal mortality data were unavailable for all 186 countries in both 2018 and 2019.
+
+The Maternal mortality missingness exhibits a systematic temporal pattern, with all observations missing in 2018–2019 and three observations missing annually from 2000–2017. Suggesting that the data availability may be consistent with a missing-at-random (MAR) mechanism conditional on year, or potentially Missing Not At Random (MNAR) mechanism.
+
+Restricting the analyses useing Maternal mortality data from 2000 to 2017 is suggeted given the lack of data.
+
+## Missing data Maternal mortality before 2018
+
+```{r}
+final_data |>
+  filter(year <= 2017, is.na(matmor)) |>
+  count(iso, name = "missing_years") |>
+  arrange(desc(missing_years))
+
+```
+
+Exploring maternal mortality further, 3 countries are missing maternal mortality data from 2000-2018. These countries are Andora, Dominica, and the Marshall Islands. These countries have no maternal mortality data for any year in the dataset.
+
+# 3. Examining Mortality Distributions
+
+```{r}
+final_data |>
+  pivot_longer(
+    cols = c(matmor, infmor, neomor, un5mor),
+    names_to = "mortality_type",
+    values_to = "mortality_rate"
+  ) |>
+  ggplot(aes(x = mortality_rate)) +
+  geom_histogram(bins = 30) +
+  facet_wrap(~mortality_type, scales = "free",
+   labeller = as_labeller(c(
+      matmor= "Maternal",
+      infmor = "Infant",
+      neomor = "Neonatal",
+      un5mor = "Under-five"
+    ))) +
+  theme_minimal()
+```
+
+The above plots show the distribution of different mortality types. Mortality rate is shown on the x axis and mortality count on the Y axis.
+
+# 4. Investigate Armed Conflict Exposure
+
+```{r}
+table(final_data$armed_conflict_lag1, useNA = "ifany")
+```
+
+There are 704 observations with armed conflict exposure.
+
+# 5. Investigate Mortality and Armed Conflict
+
+```{r}
+ggplot(
+  final_data,
+  aes(
+    x = factor(armed_conflict_lag1,levels = c(0, 1),
+      labels = c("No recorded conflict", "Conflict recorded")),
+    y = matmor,
+    fill= factor(armed_conflict_lag1,levels = c(0, 1),
+      labels = c("No recorded conflict", "Conflict recorded"))
+  )
+) +
+  geom_boxplot() +
+  labs(
+    x = "Armed Conflict in Previous Year",
+    y = "Maternal Mortality Rate (per 100,000 live births)",
+    fill = "Previous-year conflict",
+    title = "Maternal Mortality by Armed Conflict Exposure"
+  ) +
+  theme_minimal()
+```
+
+Maternal mortality seems to increase by armed conflict in the preceeding year.
+
+```{r}
+final_data |>
+  pivot_longer(
+    cols = c( infmor, neomor, un5mor),
+    names_to = "mortality_type",
+    values_to = "mortality_rate"
+  ) |>
+  filter(!is.na(armed_conflict_lag1)) |>
+  mutate(
+    conflict_present = factor(
+      armed_conflict_lag1,
+      levels = c(0, 1),
+      labels = c("No recorded conflict", "Conflict recorded")
+    )
+  ) |>
+  ggplot(aes(
+    x = conflict_present,
+    y = mortality_rate,
+    fill = conflict_present
+  )) +
+  geom_boxplot(na.rm = TRUE) +
+  facet_wrap(
+    ~mortality_type,
+    scales = "free_y",
+    labeller = as_labeller(c(
+      infmor = "Infant",
+      neomor = "Neonatal",
+      un5mor = "Under-five"
+    ))
+  ) +
+  labs(
+    x = "Armed conflict in the previous year",
+    y = "Mortality rate",
+    title = "Mortality distributions by previous-year armed conflict",
+    subtitle = "Mortality: per 1,000"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+```
+
+Infant, neonatal and under-5 mortality all increase after armed conflict. 
+
+
+# 6. Investigate Mortality and Natural Disasters
+
+```{r}
+final_data |>
+  pivot_longer(
+    cols = c(matmor, infmor, neomor, un5mor),
+    names_to = "mortality_type",
+    values_to = "mortality_rate"
+  ) |>
+  pivot_longer(
+    cols = c(drought, earthquake),
+    names_to = "disaster_type",
+    values_to = "disaster_present"
+  ) |>
+  mutate(
+    disaster_present = factor(
+      disaster_present,
+      levels = c(0, 1),
+      labels = c("No recorded disaster", "Disaster recorded")
+    )
+  ) |>
+  ggplot(aes(x = disaster_present, y = mortality_rate,
+             fill = disaster_present)) +
+  geom_boxplot(na.rm = TRUE) +
+  facet_grid(mortality_type ~ disaster_type, scales = "free_y") +
+  labs(
+    x = NULL,
+    y = "Mortality rate",
+    title = "Mortality distributions by disaster occurrence",
+    subtitle = "Maternal: per 100,000 live births; other mortality: per 1,000"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "none")
+```
+
+Overall it looks like mortality may increase the year preeding drought exposure. Conversly, earthquake exposure does not show a increase in mortality. 
+
+# 7. Mortality Trends Over Time
+
+```{r}
+final_data |>
+  group_by(year) |>
+  summarise(
+    mean_maternal_mortality = mean(matmor, na.rm = TRUE),
+    .groups = "drop"
+  ) |>
+  ggplot(aes(x = year, y = mean_maternal_mortality)) +
+  geom_line() +
+  geom_point() +
+  labs(
+    x = "Year",
+    y = "Mean Maternal Mortality(per 100,000 live births)",
+    title = "Maternal Mortality Over Time"
+  ) +
+  theme_minimal()
+```
+
+Average maternal mortality seems to be decreasing over time, with the highest mean mortality rate in 2000.
+
+## Other mortality rates over time
+
+```{r}
+final_data |>
+  pivot_longer(
+    cols = c(infmor, neomor, un5mor),
+    names_to = "mortality_type",
+    values_to = "mortality_rate"
+  ) |>
+  group_by(year, mortality_type) |>
+  summarise(
+    mean_mortality = if (all(is.na(mortality_rate))) {
+      NA_real_
+    } else {
+      mean(mortality_rate, na.rm = TRUE)
+    },
+    .groups = "drop"
+  ) |>
+  ggplot(aes(x = year, y = mean_mortality)) +
+  geom_line(na.rm = TRUE) +
+  geom_point(na.rm = TRUE) +
+  facet_wrap(
+    ~mortality_type,
+    scales = "free_y",
+    labeller = as_labeller(c(
+      infmor = "Infant (per 1,000 live births)",
+      neomor = "Neonatal (per 1,000 live births)",
+      un5mor = "Under-five (per 1,000 live births)"
+    ))
+  ) +
+  labs(
+    x = "Year",
+    y = "Mean mortality",
+    title = "Mortality Over Time",
+    subtitle = "Unweighted country means; missing values excluded"
+  ) +
+  theme_minimal()
+
+
+```
+
+All other mortality rates (Infant, Neonatal, Under-five) show a decrease over time. 
+
+# 8. Summary
+
+There are 3720 rows, 186 countries, with data from 19 years (2000 to 2019), and there are 704 observations with armed conflict exposure.
+
+Overall 1% of the data is missing, most of which (11.45%)is missing from Maternal Mortality data, or GDP data (1.67%).
+
+Missing Maternal mortality Data: 
+    - Missisng data for all 186 countries in 2018 and 2019 
+    - 3 countries with no mortality data for ANY year, Andora, Dominica, and the Marshall Islands
+
+Overall, maternal mortality seems to increase with armed confict exposure and drought, and decrease overtime with the lowest mortality rate shown in the latest year examined. This same pattern is observed with all other mortality values (infant, neonatal, and under-five) 
+
