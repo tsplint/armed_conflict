@@ -1,3 +1,5 @@
+# Figure 1 maternal mortality trends from 2000-2017 in countires with increasing mortality
+# includes codex's suggested changes to make the graph more visually appealing
 #load libraries
 library(tidyverse)
 library(ggplot2)
@@ -41,6 +43,21 @@ plot_data <- mortality_trends |>
 # check countries 
 n_distinct(plot_data$iso)
 
+# Codex: Use a unique colour for every country, with line types as an extra cue.
+country_order <- sort(unique(plot_data$iso))
+palette <- c(
+  "#E6194B", "#3CB44B", "#4363D8", "#F58231",
+  "#911EB4", "#008080", "#B06000", "#000000",
+  "#42BFD0", "#A64D79", "#808000", "#800000",
+  "#555555"
+)
+country_colours <- setNames(rep(palette, length.out = length(country_order)), country_order)
+country_lines <- setNames(
+  rep(c("solid", "longdash"), each = 8,
+      length.out = length(country_order)),
+  country_order
+)
+
 # create graph with ggplot
 fig01_matmor_increase <- ggplot(
   plot_data,
@@ -48,30 +65,47 @@ fig01_matmor_increase <- ggplot(
     x = year,
     y = matmor,
     color = iso,
+    linetype = iso,
     group = iso
   )
 ) +
-  geom_line(linewidth = 1) +
-  geom_point(size = 1.5) +
+  geom_line(linewidth = 0.8) +
+  geom_point(size = 1.2) +
   scale_x_continuous(
-    breaks = seq(2000, 2017, by = 2)
+    breaks = c(seq(2000, 2016, by = 2), 2017)
   ) +
-  scale_color_hue() +
+  scale_color_manual(values = country_colours) +
+  scale_linetype_manual(values = country_lines) +
   labs(
-    title = "Maternal Mortality Trends",
-    subtitle = "Countries with higher maternal mortality in 2017 than in 2000",
+    title = "Maternal mortality trends, 2000–2017",
+    subtitle = "Countries with higher mortality in 2017 than in 2000",
     x = "Year",
-    y = "Maternal mortality per 100,000 live births",
-    color = "Country (ISO)"
+    y = "Maternal mortality\n(per 100,000 live births)",
+    color = "Country (ISO)",
+    linetype = "Country (ISO)",
+    caption = "Selection reflects net change between endpoints, not an increase in every year."
   ) +
-  theme_classic(base_size = 12) +
+  guides(
+    color = guide_legend(ncol = 4, byrow = TRUE),
+    linetype = guide_legend(ncol = 4, byrow = TRUE)
+  ) +
+  theme_classic(base_size = 10) +
   theme(
-    plot.title = element_text(face = "bold", size = 15),
-    plot.subtitle = element_text(size = 11),
-    legend.position = "right",
-    legend.title = element_text(face = "bold"),
-    legend.text = element_text(size = 9),
-    axis.text.x = element_text(angle = 45, hjust = 1)
+    plot.title = element_text(face = "bold", size = 11, colour = "#20354A"),
+    plot.subtitle = element_text(size = 9, colour = "#59636D", margin = margin(b = 8)),
+    plot.caption = element_text(size = 7, colour = "#59636D", hjust = 0, margin = margin(t = 6)),
+    legend.position = "bottom",
+    legend.title = element_text(face = "bold", size = 8),
+    legend.title.position = "top",
+    legend.text = element_text(size = 8),
+    legend.key.width = grid::unit(0.7, "cm"),
+    legend.key.height = grid::unit(0.35, "cm"),
+    legend.margin = margin(2, 2, 2, 2),
+    axis.title = element_text(size = 9),
+    axis.text = element_text(size = 8),
+    panel.grid.major.y = element_line(colour = "#E5E9ED", linewidth = 0.35),
+    axis.text.x = element_text(angle = 0, hjust = 0.5),
+    plot.margin = margin(8, 8, 8, 8)
   )
 
 fig01_matmor_increase
