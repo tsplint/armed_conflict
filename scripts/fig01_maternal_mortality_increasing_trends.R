@@ -74,16 +74,24 @@ fig01_matmor_increase <- ggplot(
   scale_x_continuous(
     breaks = c(seq(2000, 2016, by = 2), 2017)
   ) +
+  scale_y_log10(
+    breaks = c(5, 10, 20, 50, 100, 200, 500),
+    labels = scales::label_comma()
+  ) +
   scale_color_manual(values = country_colours) +
   scale_linetype_manual(values = country_lines) +
   labs(
     title = "Maternal mortality trends, 2000–2017",
     subtitle = "Countries with higher mortality in 2017 than in 2000",
     x = "Year",
-    y = "Maternal mortality\n(per 100,000 live births)",
+    y = "Maternal mortality per 100,000 live births\n(log scale)",
     color = "Country (ISO)",
     linetype = "Country (ISO)",
-    caption = "Selection reflects net change between endpoints, not an increase in every year."
+    caption = paste(
+      "Log scale: equal vertical distances represent equal proportional changes.",
+      "Selection reflects net change between endpoints, not an increase in every year.",
+      sep = "\n"
+    )
   ) +
   guides(
     color = guide_legend(ncol = 4, byrow = TRUE),
