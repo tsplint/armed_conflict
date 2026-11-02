@@ -334,7 +334,7 @@ table_1_rows
 
 #### Export to pdf ####
 
-dir.create("tables", showWarnings = FALSE)
+dir.create("outputs", showWarnings = FALSE)
 
 
 
@@ -350,13 +350,13 @@ table_pdf <- set_caption(
 # Save as HTML
 flextable::save_as_html(
   table_pdf,
-  path = "tables/table01_variables_as_rows.html"
+  path = "outputs/table01_variables_as_rows.html"
 )
 
 # Convert HTML to PDF
 pagedown::chrome_print(
-  input = "tables/table01_variables_as_rows.html",
-  output = "tables/table01_variables_as_rows.pdf",
+  input = "outputs/table01_variables_as_rows.html",
+  output = "outputs/table01_variables_as_rows.pdf",
   options = list(
     paperWidth = 8.27,
     paperHeight = 11.69,

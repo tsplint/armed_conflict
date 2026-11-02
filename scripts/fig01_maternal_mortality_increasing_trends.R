@@ -120,10 +120,10 @@ fig01_matmor_increase
 
 
 # save as png 
-dir.create("figures", showWarnings = FALSE)
+dir.create("outputs", showWarnings = FALSE)
 
 ggsave(
-  filename = "figures/fig01_increasing_maternal_mortality.png",
+  filename = "outputs/fig01_increasing_maternal_mortality.png",
   plot = fig01_matmor_increase,
   width = 11,
   height = 7,
