@@ -1,6 +1,6 @@
-### Mulitple Imputation of Armed Conflict Data --  week 8 assignment CHL5233 ####
-
-# GDP was log transformed prior to imputation 
+### Mulitple Imputation of Armed Conflict Data ###
+## Week 8 assignment CHL5233
+## Note: GDP was log transformed prior to imputation 
 
 # load packages
 library(tidyverse)
@@ -154,7 +154,7 @@ summary(out.mi.infmor, conf.int = TRUE)
 summary(out.mi.neomor, conf.int = TRUE)
 
 
-### regression models complete cases for table
+### regression models complete cases for table comparasion
 
 
 matmormod <- lm(
@@ -197,7 +197,7 @@ neomormod <- lm(
   na.action = na.omit
 )
 
-# Check complete-case sample sizes
+# Check cc sample sizes
 nobs(matmormod)
 nobs(un5mormod)
 nobs(infmormod)
@@ -332,7 +332,7 @@ html_table_cc_vs_mi <- final_table |>
     font_size = 14
   ) |>
   kableExtra::add_header_above(
-    c(" " = 1, "Regression coefficient (95% CI)" = 2)
+    c(" " = 1, "Regression coefficient β (95% CI)" = 2)
   ) |>
   kableExtra::pack_rows(
     index = setNames(
