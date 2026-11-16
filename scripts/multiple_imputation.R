@@ -362,3 +362,18 @@ kableExtra::save_kable(
   self_contained = TRUE
 )
 
+# save as pdf
+pagedown::chrome_print(
+  input = "outputs/CC_vs_MI_table.html",
+  output = "outputs/CC_vs_MI_table.pdf",
+  options = list(
+    landscape = FALSE,
+    printBackground = TRUE,
+    paperWidth = 8.27,
+    paperHeight = 11.69,
+    marginTop = 0.4,
+    marginBottom = 0.4,
+    marginLeft = 0.4,
+    marginRight = 0.4
+  )
+)
