@@ -35,7 +35,7 @@ colSums(is.na(midata))
 
 
 
-## mice initialization dry run
+### mice initialization dry run
 
 mice0 <- mice(
   midata,
