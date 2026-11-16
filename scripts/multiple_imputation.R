@@ -8,6 +8,7 @@ library(mice)
 library(lme4)
 library(knitr)
 library(kableExtra)
+library(pagedown)
 
 
 # Load data
