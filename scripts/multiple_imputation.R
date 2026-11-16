@@ -306,7 +306,7 @@ print(final_table, n = Inf)
 
 
 ### save CC vs MI table
-# codex Improved readibility and headings in following table
+# note: codex gave notes to improve headings in following table
 
 # Save table as HTML 
 html_table_cc_vs_mi <- final_table |>
